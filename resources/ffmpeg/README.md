@@ -4,10 +4,11 @@ This folder should contain the FFmpeg binary for Windows.
 
 ## Setup Instructions
 
-1. Download FFmpeg for Windows from: https://ffmpeg.org/download.html
-2. Extract the downloaded archive
-3. Copy `ffmpeg.exe` from the `bin` folder to this directory
-4. The final structure should be:
+1. Download FFmpeg for Windows from: https://www.gyan.dev/ffmpeg/builds/#release-builds
+2. Download `ffmpeg-release-full.7z` this file
+3. Extract the downloaded archive
+4. Copy `ffmpeg.exe` from the `bin` folder to this directory
+5. The final structure should be:
    ```
    resources/
    └── ffmpeg/

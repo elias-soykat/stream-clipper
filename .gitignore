@@ -8,3 +8,10 @@ out
 Clips
 build
 dist
+
+# Large binary files
+*.exe
+*.dll
+*.so
+*.dylib
+resources/ffmpeg/

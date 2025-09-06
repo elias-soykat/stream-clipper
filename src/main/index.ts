@@ -25,6 +25,7 @@ interface ClipInfo {
 let isRecording = false
 let recordingProcess: ChildProcess | null = null
 let hotkeyRegistered = false
+let lastSavedBufferTime: Date | null = null // Track when we last saved a clip
 let settings: RecordingSettings = {
   captureSource: 'monitor',
   clipDuration: 30,
@@ -206,6 +207,9 @@ const startRecording = async (): Promise<void> => {
   // Set recording flag after successful spawn
   isRecording = true
 
+  // Reset the last saved time when starting new recording
+  lastSavedBufferTime = null
+
   // Log FFmpeg output for debugging
   recordingProcess.stderr?.on('data', (data) => {
     console.log('FFmpeg stderr:', data.toString())
@@ -334,6 +338,8 @@ const saveClip = async (): Promise<string> => {
 
             if (code === 0) {
               console.log('Clip saved:', filename)
+              // Update the last saved time to prevent reusing this content
+              lastSavedBufferTime = new Date()
               resolve(filename)
             } else {
               reject(new Error(`FFmpeg extraction exited with code ${code}`))
@@ -358,6 +364,24 @@ const getBufferFiles = async (): Promise<string[]> => {
       .filter((file) => file.startsWith('buffer_') && file.endsWith('.mp4'))
       .map((file) => join(settings.outputPath, file))
       .sort()
+
+    // If we have a last saved time, filter out files older than that
+    if (lastSavedBufferTime) {
+      const filteredFiles: string[] = []
+      for (const file of bufferFiles) {
+        try {
+          const stats = await fs.stat(file)
+          if (stats.mtime > lastSavedBufferTime) {
+            filteredFiles.push(file)
+          }
+        } catch (error) {
+          console.error('Error checking file stats:', file, error)
+          // If we can't check the file, include it to be safe
+          filteredFiles.push(file)
+        }
+      }
+      return filteredFiles
+    }
 
     return bufferFiles
   } catch (error) {
